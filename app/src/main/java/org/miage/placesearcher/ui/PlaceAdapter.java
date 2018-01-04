@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
 
 /**
  * Created by alexmorel on 04/01/2018.
@@ -42,9 +44,15 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     @Override
     public void onBindViewHolder(PlaceAdapter.PlaceViewHolder holder, int position) {
         // Adapt the ViewHolder state to the new element
-        holder.mPlaceStreetTextView.setText(mPlaces.get(position).getStreet());
-        holder.mPlaceZipTextView.setText(mPlaces.get(position).getZipCode());
-        holder.mPlaceCityTextView.setText(mPlaces.get(position).getCity());
+        Place place = mPlaces.get(position);
+        holder.mPlaceStreetTextView.setText(place.getStreet());
+        holder.mPlaceZipTextView.setText(place.getZipCode());
+        holder.mPlaceCityTextView.setText(place.getCity());
+        if (place.getStreet().contains("1")) {
+            holder.mPlaceIcon.setImageResource(R.drawable.street_icon);
+        } else {
+            holder.mPlaceIcon.setImageResource(R.drawable.home_icon);
+        }
     }
 
     @Override
@@ -53,8 +61,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     }
 
     // Pattern ViewHolder
-    class PlaceViewHolder extends RecyclerView.ViewHolder
-    {
+    class PlaceViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.place_adapter_street)
         TextView mPlaceStreetTextView;
@@ -65,10 +72,12 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         @BindView(R.id.place_adapter_city)
         TextView mPlaceCityTextView;
 
+        @BindView(R.id.place_adapter_icon)
+        ImageView mPlaceIcon;
+
         public PlaceViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
     }
-
 }
