@@ -1,6 +1,8 @@
 package org.miage.placesearcher.ui;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.miage.placesearcher.R;
 import org.miage.placesearcher.model.Place;
 
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
@@ -53,6 +56,25 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         } else {
             holder.mPlaceIcon.setImageResource(R.drawable.home_icon);
         }
+        holder.mPlaceIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Play mp3
+                AssetFileDescriptor afd = null;
+                try {
+                    afd = context.getAssets().openFd("house.mp3");
+
+                    MediaPlayer player = new MediaPlayer();
+                    player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+                    player.prepare();
+                    player.start();
+
+                } catch (IOException e) {
+                    // Silent catch : sound will not be played
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
