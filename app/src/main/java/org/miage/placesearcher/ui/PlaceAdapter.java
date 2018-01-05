@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.miage.placesearcher.PlaceDetailActivity;
 import org.miage.placesearcher.R;
-import org.miage.placesearcher.model.Place;
+import org.miage.placesearcher.model.PlaceAddress;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,14 +26,13 @@ import butterknife.ButterKnife;
 /**
  * Created by alexmorel on 04/01/2018.
  */
-
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
 
     private LayoutInflater inflater;
     private Activity context;
-    private List<Place> mPlaces;
+    private List<PlaceAddress> mPlaces;
 
-    public PlaceAdapter(Activity context, List<Place> Places) {
+    public PlaceAdapter(Activity context, List<PlaceAddress> Places) {
         inflater = LayoutInflater.from(context);
         this.context = context;
         this.mPlaces = Places;
@@ -49,11 +48,11 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     @Override
     public void onBindViewHolder(PlaceAdapter.PlaceViewHolder holder, int position) {
         // Adapt the ViewHolder state to the new element
-        final Place place = mPlaces.get(position);
-        holder.mPlaceStreetTextView.setText(place.getStreet());
-        holder.mPlaceZipTextView.setText(place.getZipCode());
-        holder.mPlaceCityTextView.setText(place.getCity());
-        if (place.getStreet().contains("1")) {
+        final PlaceAddress place = mPlaces.get(position);
+        holder.mPlaceStreetTextView.setText(place.properties.name);
+        holder.mPlaceZipTextView.setText(""+place.properties.postcode);
+        holder.mPlaceCityTextView.setText(place.properties.city);
+        if (place.properties.city.contains("1")) {
             holder.mPlaceIcon.setImageResource(R.drawable.street_icon);
         } else {
             holder.mPlaceIcon.setImageResource(R.drawable.home_icon);
@@ -78,10 +77,11 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
 
                 // Open place details activity
                 Intent seePlaceDetailIntent = new Intent(context, PlaceDetailActivity.class);
-                seePlaceDetailIntent.putExtra("placeStreet", place.getStreet());
+                seePlaceDetailIntent.putExtra("placeStreet", place.properties.name);
                 context.startActivity(seePlaceDetailIntent);
             }
         });
+
     }
 
     @Override
@@ -89,7 +89,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         return mPlaces.size();
     }
 
-    public void setPlaces(List<Place> places) {
+    public void setPlaces(List<PlaceAddress> places) {
         this.mPlaces = places;
     }
 
