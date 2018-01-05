@@ -45,6 +45,6 @@ public class MainActivity extends AppCompatActivity {
         // Do NOT forget to call super.onResume()
         super.onResume();
 
-        PlaceSearchService.INSTANCE.searchPlacesFromAdress("Place du commerce");
+        PlaceSearchService.INSTANCE.searchPlacesFromAddress("Place du commerce");
     }
 }
