@@ -1,6 +1,7 @@
 package org.miage.placesearcher.ui;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.miage.placesearcher.PlaceDetailActivity;
 import org.miage.placesearcher.R;
 import org.miage.placesearcher.model.Place;
 
@@ -28,10 +30,10 @@ import butterknife.ButterKnife;
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
 
     private LayoutInflater inflater;
-    private Context context;
+    private Activity context;
     private List<Place> mPlaces;
 
-    public PlaceAdapter(Context context, List<Place> Places) {
+    public PlaceAdapter(Activity context, List<Place> Places) {
         inflater = LayoutInflater.from(context);
         this.context = context;
         this.mPlaces = Places;
@@ -73,6 +75,10 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
                     // Silent catch : sound will not be played
                     e.printStackTrace();
                 }
+
+                // Open place details activity
+                Intent seePlaceDetailIntent = new Intent(context, PlaceDetailActivity.class);
+                context.startActivity(seePlaceDetailIntent);
             }
         });
     }
