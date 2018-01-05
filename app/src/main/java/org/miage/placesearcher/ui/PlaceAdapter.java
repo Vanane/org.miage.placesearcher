@@ -49,7 +49,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     @Override
     public void onBindViewHolder(PlaceAdapter.PlaceViewHolder holder, int position) {
         // Adapt the ViewHolder state to the new element
-        Place place = mPlaces.get(position);
+        final Place place = mPlaces.get(position);
         holder.mPlaceStreetTextView.setText(place.getStreet());
         holder.mPlaceZipTextView.setText(place.getZipCode());
         holder.mPlaceCityTextView.setText(place.getCity());
@@ -78,6 +78,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
 
                 // Open place details activity
                 Intent seePlaceDetailIntent = new Intent(context, PlaceDetailActivity.class);
+                seePlaceDetailIntent.putExtra("placeStreet", place.getStreet());
                 context.startActivity(seePlaceDetailIntent);
             }
         });
