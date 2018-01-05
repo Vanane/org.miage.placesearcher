@@ -1,6 +1,6 @@
 package org.miage.placesearcher.event;
 
-import org.miage.placesearcher.model.Place;
+import org.miage.placesearcher.model.PlaceAddress;
 
 import java.util.List;
 
@@ -10,13 +10,13 @@ import java.util.List;
 
 public class SearchResultEvent {
 
-    private List<Place> places;
+    private List<PlaceAddress> places;
 
-    public SearchResultEvent(List<Place> places) {
+    public SearchResultEvent(List<PlaceAddress> places) {
         this.places = places;
     }
 
-    public List<Place> getPlaces() {
+    public List<PlaceAddress> getPlaces() {
         return places;
     }
 }
