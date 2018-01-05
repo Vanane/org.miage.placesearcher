@@ -1,22 +1,22 @@
 package org.miage.placesearcher;
 
-import android.os.AsyncTask;
-import android.util.Log;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.miage.placesearcher.event.EventBusManager;
 import org.miage.placesearcher.event.SearchResultEvent;
-import org.miage.placesearcher.model.Place;
+import org.miage.placesearcher.model.PlaceSearchResult;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Modifier;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
 
 /**
  * Created by alexmorel on 05/01/2018.
@@ -25,48 +25,55 @@ import okhttp3.Response;
 public class PlaceSearchService {
 
     public static PlaceSearchService INSTANCE = new PlaceSearchService();
+    private final PlaceSearchRESTService mPlaceSearchRESTService;
 
     private PlaceSearchService() {
+        // Create GSON Converter that will be used to convert from JSON to Java
+        Gson gsonConverter = new GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+                .serializeNulls()
+                .excludeFieldsWithoutExposeAnnotation().create();
 
+        // Create Retrofit client
+        Retrofit retrofit = new Retrofit.Builder()
+                // Using OkHttp as HTTP Client
+                .client(new OkHttpClient())
+                // Having the following as server URL
+                .baseUrl("https://api-adresse.data.gouv.fr")
+                // Using GSON to convert from Json to Java
+                .addConverterFactory(GsonConverterFactory.create(gsonConverter))
+                .build();
+
+        // Use retrofit to generate our REST service code
+        mPlaceSearchRESTService = retrofit.create(PlaceSearchRESTService.class);
     }
 
     public void searchPlacesFromAddress(final String search) {
-        // Create AsyncTask
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+        // Call to the REST service
+        mPlaceSearchRESTService.searchForPlaces(search).enqueue(new Callback<PlaceSearchResult>() {
+            @Override
+            public void onResponse(Call<PlaceSearchResult> call, retrofit2.Response<PlaceSearchResult> response) {
+                // Post an event so that listening activities can update their UI
+                if (response.body() != null && response.body().features != null) {
+                    EventBusManager.BUS.post(new SearchResultEvent(response.body().features));
+                } else {
+                    // Null result
+                    // We may want to display a warning to user (e.g. Toast)
+                }
+            }
 
             @Override
-            protected Void doInBackground(Void... params) {
-                // Here we are in a new background thread
-                try {
-                    final OkHttpClient okHttpClient = new OkHttpClient();
-                    final Request request = new Request.Builder()
-                            .url("https://api-adresse.data.gouv.fr/search/?q=" + search)
-                            .build();
-                    Response response = okHttpClient.newCall(request).execute();
-                    if (response != null && response.body() != null) {
-                        JSONObject jsonResult = new JSONObject(response.body().string());
-                        JSONArray jsonPlaces = jsonResult.getJSONArray("features");
-
-                        List<Place> foundPlaces = new ArrayList<>();
-                        for (int i = 0; i < jsonPlaces.length(); i++) {
-                            JSONObject jsonPlace = jsonPlaces.getJSONObject(i);
-                            JSONObject properties = jsonPlace.getJSONObject("properties");
-                            String city = properties.getString("city");
-                            String street = properties.getString("name");
-                            String zipCode = properties.getString("postcode");
-                            foundPlaces.add(new Place(0, 0, street, zipCode, city));
-                        }
-                        EventBusManager.BUS.post(new SearchResultEvent(foundPlaces));
-                    }
-                } catch (IOException e) {
-                    // Silent catch, no places will be displayed
-                    Log.e("PlaceSearcher - Network Issue", e.getMessage());
-                } catch (JSONException e) {
-                    // Silent catch, no places will be displayed
-                    Log.e("PlaceSearcher - Json Exception", e.getMessage());
-                }
-                return null;
+            public void onFailure(Call<PlaceSearchResult> call, Throwable t) {
+                // Request has failed or is not at expected format
+                // We may want to display a warning to user (e.g. Toast)
             }
-        }.execute();
+        });
+    }
+
+    // Service describing the REST APIs
+    public interface PlaceSearchRESTService {
+
+        @GET("search/")
+        Call<PlaceSearchResult> searchForPlaces(@Query("q") String search);
     }
 }
