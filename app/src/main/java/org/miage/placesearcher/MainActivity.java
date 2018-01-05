@@ -1,5 +1,6 @@
 package org.miage.placesearcher;
 
+
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
