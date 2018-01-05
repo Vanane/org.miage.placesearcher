@@ -35,4 +35,7 @@ dependencies {
     // Add ButterKnife to project
     implementation 'com.jakewharton:butterknife:10.2.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
+
+    // Add OkHTTP
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
 }
