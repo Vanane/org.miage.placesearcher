@@ -38,4 +38,7 @@ dependencies {
 
     // Add OkHTTP
     implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+
+    // Add Otto Event Bus
+    compile 'com.squareup:otto:+'
 }

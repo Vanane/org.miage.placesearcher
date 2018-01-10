@@ -89,6 +89,10 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         return mPlaces.size();
     }
 
+    public void setPlaces(List<Place> places) {
+        this.mPlaces = places;
+    }
+
     // Pattern ViewHolder
     class PlaceViewHolder extends RecyclerView.ViewHolder {
 

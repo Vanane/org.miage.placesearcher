@@ -7,20 +7,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.miage.placesearcher.model.Place;
+import com.squareup.otto.Subscribe;
+
+import org.miage.placesearcher.event.EventBusManager;
+import org.miage.placesearcher.event.SearchResultEvent;
 import org.miage.placesearcher.ui.PlaceAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
+    private PlaceAdapter mPlaceAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,15 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Binding ButterKnife annotations now that content view has been set
         ButterKnife.bind(this);
-        
-        // Define list of persons
-        List<Place> places = new ArrayList<Place>();
-        for (int i = 0; i < 50000; i ++) {
-            places.add(new Place(0, 0, "Street" + i, "44000", "Nantes"));
-        }
-        // Instanciate a PersonAdapter
-        PlaceAdapter adapter = new PlaceAdapter(this, places);
-        mRecyclerView.setAdapter(adapter);
+
+        // Instanciate a PlaceAdpater with empty content
+        mPlaceAdapter = new PlaceAdapter(this, new ArrayList<>());
+        mRecyclerView.setAdapter(mPlaceAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
@@ -45,6 +43,25 @@ public class MainActivity extends AppCompatActivity {
         // Do NOT forget to call super.onResume()
         super.onResume();
 
+        // Register to Event bus : now each time an event is posted, the activity will receive it if it is @Subscribed to this event
+        EventBusManager.BUS.register(this);
+
         PlaceSearchService.INSTANCE.searchPlacesFromAddress("Place du commerce");
+    }
+
+    @Override
+    protected void onPause() {
+        // Unregister from Event bus : if event are posted now, the activity will not receive it
+        EventBusManager.BUS.unregister(this);
+
+        super.onPause();
+    }
+
+    @Subscribe
+    public void searchResult(final SearchResultEvent event) {
+        // Here someone has posted a SearchResultEvent
+        // Update adapter's model
+        mPlaceAdapter.setPlaces(event.getPlaces());
+        runOnUiThread(() -> mPlaceAdapter.notifyDataSetChanged());
     }
 }
