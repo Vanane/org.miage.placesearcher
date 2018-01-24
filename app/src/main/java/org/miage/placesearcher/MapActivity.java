@@ -2,6 +2,11 @@ package org.miage.placesearcher;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +15,7 @@ import com.squareup.otto.Subscribe;
 import org.miage.placesearcher.event.EventBusManager;
 import org.miage.placesearcher.event.SearchResultEvent;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -19,6 +25,11 @@ import butterknife.OnClick;
 
 public class MapActivity extends AppCompatActivity {
 
+    @BindView(R.id.activity_main_search_adress_edittext)
+    EditText mSearchEditText;
+
+    @BindView(R.id.activity_main_loader)
+    ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +38,33 @@ public class MapActivity extends AppCompatActivity {
 
         // Binding ButterKnife annotations now that content view has been set
         ButterKnife.bind(this);
+
+        // Set textfield value according to intent
+        if (getIntent().hasExtra("currentSearch")) {
+            mSearchEditText.setText(getIntent().getStringExtra("currentSearch"));
+        }
+
+        mSearchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Nothing to do when texte is about to change
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // While text is changing, hide list and show loader
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Once text has changed
+                // Show a loader
+                mProgressBar.setVisibility(View.VISIBLE);
+
+                // Launch a search through the PlaceSearchService
+                PlaceSearchService.INSTANCE.searchPlacesFromAddress(editable.toString());
+            }
+        });
     }
 
     @Override
@@ -36,6 +74,9 @@ public class MapActivity extends AppCompatActivity {
 
         // Register to Event bus : now each time an event is posted, the activity will receive it if it is @Subscribed to this event
         EventBusManager.BUS.register(this);
+
+        // Refresh search
+        PlaceSearchService.INSTANCE.searchPlacesFromAddress(mSearchEditText.getText().toString());
     }
 
     @Override
@@ -57,6 +98,7 @@ public class MapActivity extends AppCompatActivity {
     @OnClick(R.id.activity_map_switch_button)
     public void clickedOnSwitchToList() {
         Intent switchToListIntent = new Intent(this, MainActivity.class);
+        switchToListIntent.putExtra("currentSearch", mSearchEditText.getText().toString());
         startActivity(switchToListIntent);
     }
 }

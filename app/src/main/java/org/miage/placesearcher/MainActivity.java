@@ -50,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mPlaceAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Set textfield value according to intent
+        if (getIntent().hasExtra("currentSearch")) {
+            mSearchEditText.setText(getIntent().getStringExtra("currentSearch"));
+        }
+
         mSearchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -80,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Register to Event bus : now each time an event is posted, the activity will receive it if it is @Subscribed to this event
         EventBusManager.BUS.register(this);
+
+        // Refresh search
+        PlaceSearchService.INSTANCE.searchPlacesFromAddress(mSearchEditText.getText().toString());
     }
 
     @Override
@@ -107,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.activity_main_switch_button)
     public void clickedOnSwitchToMap() {
         Intent switchToMapIntent = new Intent(this, MapActivity.class);
+        switchToMapIntent.putExtra("currentSearch", mSearchEditText.getText().toString());
         startActivity(switchToMapIntent);
     }
 }
