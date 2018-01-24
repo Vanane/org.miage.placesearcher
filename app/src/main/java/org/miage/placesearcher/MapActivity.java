@@ -1,6 +1,8 @@
 package org.miage.placesearcher;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,10 +15,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.otto.Subscribe;
 
 import org.miage.placesearcher.event.EventBusManager;
 import org.miage.placesearcher.event.SearchResultEvent;
+import org.miage.placesearcher.model.PlaceAddress;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -99,9 +105,39 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Subscribe
     public void searchResult(final SearchResultEvent event) {
-        // Here someone has posted a SearchResultEvent
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        // Update map's markers
+                // Here someone has posted a SearchResultEvent
+                // Check that map is ready
+                if (mActiveGoogleMap != null) {
+                    // Update map's markers
+                    mActiveGoogleMap.clear();
+                    for (PlaceAddress place : event.getPlaces()) {
+                        // Step 1: create marker icon (and resize drawable so that marker is not too big)
+                        int markerIconResource;
+                        if (place.properties.isStreet()) {
+                            markerIconResource = R.drawable.street_icon;
+                        } else {
+                            markerIconResource = R.drawable.home_icon;
+                        }
+                        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), markerIconResource);
+                        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, 50, 50, false);
+
+                        // Step 2: define marker options
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(new LatLng(place.geometry.getLatitude(), place.geometry.getLongitude()))
+                                .title(place.properties.name)
+                                .snippet(place.properties.postcode + "  " + place.properties.city)
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap));
+
+                        // Step 3: add marker
+                        mActiveGoogleMap.addMarker(markerOptions);
+                    }
+                }
+            }
+        });
 
     }
 
