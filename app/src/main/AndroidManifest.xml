@@ -11,6 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBcRt3W8uifSjrhXBu2467iz9ciQqMNTzM"/>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,6 +26,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PlaceDetailActivity" />
+        <activity android:name=".MapActivity" />
     </application>
 
 </manifest>

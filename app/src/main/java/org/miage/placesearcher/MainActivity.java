@@ -1,6 +1,7 @@
 package org.miage.placesearcher;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -101,5 +102,11 @@ public class MainActivity extends AppCompatActivity {
             mProgressBar.setVisibility(View.GONE);
         });
 
+    }
+
+    @OnClick(R.id.activity_main_switch_button)
+    public void clickedOnSwitchToMap() {
+        Intent switchToMapIntent = new Intent(this, MapActivity.class);
+        startActivity(switchToMapIntent);
     }
 }
