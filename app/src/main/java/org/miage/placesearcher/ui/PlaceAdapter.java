@@ -52,7 +52,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         holder.mPlaceStreetTextView.setText(place.properties.name);
         holder.mPlaceZipTextView.setText(""+place.properties.postcode);
         holder.mPlaceCityTextView.setText(place.properties.city);
-        if (place.properties.city.contains("1")) {
+        if (place.properties.isStreet()) {
             holder.mPlaceIcon.setImageResource(R.drawable.street_icon);
         } else {
             holder.mPlaceIcon.setImageResource(R.drawable.home_icon);
