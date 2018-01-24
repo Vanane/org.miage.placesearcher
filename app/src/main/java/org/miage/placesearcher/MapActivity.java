@@ -12,11 +12,13 @@ import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.otto.Subscribe;
@@ -110,7 +112,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Subscribe
     public void searchResult(final SearchResultEvent event) {
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -121,6 +122,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     mActiveGoogleMap.clear();
                     mMarkersToPlaces.clear();
 
+                    LatLngBounds.Builder cameraBounds = LatLngBounds.builder();
                     for (PlaceAddress place : event.getPlaces()) {
                         // Step 1: create marker icon (and resize drawable so that marker is not too big)
                         int markerIconResource;
@@ -139,14 +141,28 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 .snippet(place.properties.postcode + "  " + place.properties.city)
                                 .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap));
 
-                        // Step 3: add marker
+                        // Step 3: include marker in camera bounds
+                        cameraBounds.include(markerOptions.getPosition());
+
+                        // Step 4: add marker
                         Marker marker = mActiveGoogleMap.addMarker(markerOptions);
                         mMarkersToPlaces.put(marker.getId(), place);
                     }
+
+                    // Finaly, move camera to reveal all markers
+                    if (event.getPlaces().size() > 0) {
+                        int width = getResources().getDisplayMetrics().widthPixels;
+                        int height = getResources().getDisplayMetrics().heightPixels;
+                        int padding = (int) (width * 0.10); // offset from edges of the map 10% of screen
+
+                        mActiveGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), width, height, padding));
+                    }
                 }
+
+                // Hide loader
+                mProgressBar.setVisibility(View.GONE);
             }
         });
-
     }
 
     @OnClick(R.id.activity_map_switch_button)
