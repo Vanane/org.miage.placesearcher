@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 mProgressBar.setVisibility(View.VISIBLE);
 
                 // Launch a search through the PlaceSearchService
-                PlaceSearchService.INSTANCE.searchPlacesFromAddress(editable.toString(), false);
+                PlaceSearchService.INSTANCE.searchPlacesFromAddress(editable.toString());
             }
         });
     }
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         EventBusManager.BUS.register(this);
 
         // Refresh search
-        PlaceSearchService.INSTANCE.searchPlacesFromAddress(mSearchEditText.getText().toString(), true);
+        PlaceSearchService.INSTANCE.searchPlacesFromAddress(mSearchEditText.getText().toString());
     }
 
     @Override
