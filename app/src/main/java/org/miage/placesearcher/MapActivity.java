@@ -10,6 +10,9 @@ import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.squareup.otto.Subscribe;
 
 import org.miage.placesearcher.event.EventBusManager;
@@ -23,13 +26,14 @@ import butterknife.OnClick;
  * Created by alexmorel on 17/01/2018.
  */
 
-public class MapActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     @BindView(R.id.activity_main_search_adress_edittext)
     EditText mSearchEditText;
 
     @BindView(R.id.activity_main_loader)
     ProgressBar mProgressBar;
+    private GoogleMap mActiveGoogleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,11 @@ public class MapActivity extends AppCompatActivity {
 
         // Binding ButterKnife annotations now that content view has been set
         ButterKnife.bind(this);
+
+        // Get map fragment
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         // Set textfield value according to intent
         if (getIntent().hasExtra("currentSearch")) {
@@ -93,6 +102,7 @@ public class MapActivity extends AppCompatActivity {
         // Here someone has posted a SearchResultEvent
 
         // Update map's markers
+
     }
 
     @OnClick(R.id.activity_map_switch_button)
@@ -100,5 +110,12 @@ public class MapActivity extends AppCompatActivity {
         Intent switchToListIntent = new Intent(this, MainActivity.class);
         switchToListIntent.putExtra("currentSearch", mSearchEditText.getText().toString());
         startActivity(switchToListIntent);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mActiveGoogleMap = googleMap;
+        mActiveGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+        mActiveGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
     }
 }
