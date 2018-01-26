@@ -126,7 +126,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     for (PlaceAddress place : event.getPlaces()) {
                         // Step 1: create marker icon (and resize drawable so that marker is not too big)
                         int markerIconResource;
-                        if (place.properties.isStreet()) {
+                        if (place.getProperties().isStreet()) {
                             markerIconResource = R.drawable.street_icon;
                         } else {
                             markerIconResource = R.drawable.home_icon;
@@ -136,9 +136,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                         // Step 2: define marker options
                         MarkerOptions markerOptions = new MarkerOptions()
-                                .position(new LatLng(place.geometry.getLatitude(), place.geometry.getLongitude()))
-                                .title(place.properties.name)
-                                .snippet(place.properties.postcode + "  " + place.properties.city)
+                                .position(new LatLng(place.getCoordinates().latitude, place.getCoordinates().longitude))
+                                .title(place.getProperties().name)
+                                .snippet(place.getProperties().postcode + "  " + place.getProperties().city)
                                 .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap));
 
                         // Step 3: include marker in camera bounds
@@ -149,18 +149,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         mMarkersToPlaces.put(marker.getId(), place);
                     }
 
-                    // Finaly, move camera to reveal all markers
-                    if (event.getPlaces().size() > 0) {
-                        int width = getResources().getDisplayMetrics().widthPixels;
-                        int height = getResources().getDisplayMetrics().heightPixels;
-                        int padding = (int) (width * 0.10); // offset from edges of the map 10% of screen
-
-                        mActiveGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), width, height, padding));
-                    }
+                    // Hide loader
+                    mProgressBar.setVisibility(View.GONE);
                 }
-
-                // Hide loader
-                mProgressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -184,7 +175,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 PlaceAddress associatedPlace = mMarkersToPlaces.get(marker.getId());
                 if (associatedPlace != null) {
                     Intent seePlaceDetailIntent = new Intent(MapActivity.this, PlaceDetailActivity.class);
-                    seePlaceDetailIntent.putExtra("placeStreet", associatedPlace.properties.name);
+                    seePlaceDetailIntent.putExtra("placeStreet", associatedPlace.getProperties().name);
                     startActivity(seePlaceDetailIntent);
                 }
             }

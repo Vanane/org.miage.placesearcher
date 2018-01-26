@@ -49,10 +49,10 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     public void onBindViewHolder(PlaceAdapter.PlaceViewHolder holder, int position) {
         // Adapt the ViewHolder state to the new element
         final PlaceAddress place = mPlaces.get(position);
-        holder.mPlaceStreetTextView.setText(place.properties.name);
-        holder.mPlaceZipTextView.setText(""+place.properties.postcode);
-        holder.mPlaceCityTextView.setText(place.properties.city);
-        if (place.properties.isStreet()) {
+        holder.mPlaceStreetTextView.setText(place.getProperties().name);
+        holder.mPlaceZipTextView.setText(""+place.getProperties().postcode);
+        holder.mPlaceCityTextView.setText(place.getProperties().city);
+        if (place.getProperties().isStreet()) {
             holder.mPlaceIcon.setImageResource(R.drawable.street_icon);
         } else {
             holder.mPlaceIcon.setImageResource(R.drawable.home_icon);
@@ -77,7 +77,7 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
 
                 // Open place details activity
                 Intent seePlaceDetailIntent = new Intent(context, PlaceDetailActivity.class);
-                seePlaceDetailIntent.putExtra("placeStreet", place.properties.name);
+                seePlaceDetailIntent.putExtra("placeStreet", place.getProperties().name);
                 context.startActivity(seePlaceDetailIntent);
             }
         });
