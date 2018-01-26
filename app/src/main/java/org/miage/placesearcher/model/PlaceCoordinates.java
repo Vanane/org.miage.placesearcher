@@ -1,5 +1,8 @@
 package org.miage.placesearcher.model;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
@@ -9,22 +12,18 @@ import java.util.List;
  * Created by alexmorel on 24/01/2018.
  */
 
-public class PlaceCoordinates {
+@Table(name = "PlaceCoordinates")
+public class PlaceCoordinates extends Model {
+
+    @Column(name = "label", index = true, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
+    public String label;
 
     @Expose
-    List<Double> coordinates = new ArrayList<>();
+    public List<Double> coordinates = new ArrayList<>();
 
-    public Double getLatitude() {
-        if (coordinates.size() >= 2) {
-            return coordinates.get(1);
-        }
-        return 0d;
-    }
+    @Column(name = "latitude")
+    public double latitude = 0;
 
-    public Double getLongitude() {
-        if (coordinates.size() >= 2) {
-            return coordinates.get(0);
-        }
-        return 0d;
-    }
+    @Column(name = "longitude")
+    public double longitude = 0;
 }

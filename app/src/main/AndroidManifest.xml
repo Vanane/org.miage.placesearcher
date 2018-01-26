@@ -33,6 +33,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBcRt3W8uifSjrhXBu2467iz9ciQqMNTzM"/>
 
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="org.miage.placesearcher.model.PlaceAddress,
+                           org.miage.placesearcher.model.PlaceCoordinates,
+                           org.miage.placesearcher.model.PlaceProperties" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
