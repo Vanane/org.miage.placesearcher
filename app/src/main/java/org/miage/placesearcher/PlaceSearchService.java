@@ -1,13 +1,19 @@
 package org.miage.placesearcher;
 
+import android.util.Log;
+
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.query.Select;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.miage.placesearcher.event.EventBusManager;
 import org.miage.placesearcher.event.SearchResultEvent;
+import org.miage.placesearcher.model.PlaceAddress;
 import org.miage.placesearcher.model.PlaceSearchResult;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -65,16 +71,38 @@ public class PlaceSearchService {
         // Schedule a network call in REFRESH_DELAY ms
         mLastScheduleTask = mScheduler.schedule(new Runnable() {
             public void run() {
-                // Call to the REST service
+                // Step 1 : first run a local search from DB and post result
+                searchPlacesFromDB(search);
+
+                // Step 2 : Call to the REST service
                 mPlaceSearchRESTService.searchForPlaces(search).enqueue(new Callback<PlaceSearchResult>() {
                     @Override
                     public void onResponse(Call<PlaceSearchResult> call, Response<PlaceSearchResult> response) {
                         // Post an event so that listening activities can update their UI
                         if (response.body() != null && response.body().features != null) {
-                            EventBusManager.BUS.post(new SearchResultEvent(response.body().features));
+                            // Save all results in Database
+                            ActiveAndroid.beginTransaction();
+                            for (PlaceAddress place : response.body().features) {
+                                // Set id for place & geometry
+                                place.label = place.properties.label;
+                                place.geometry.label = place.properties.label;
+                                // Convert coordinates list to actual latitude/longitude fields
+                                place.geometry.latitude = place.geometry.coordinates.get(1);
+                                place.geometry.longitude = place.geometry.coordinates.get(0);
+                                place.save();
+                                place.geometry.save();
+                                place.properties.save();
+                            }
+                            ActiveAndroid.setTransactionSuccessful();
+                            ActiveAndroid.endTransaction();
+
+                            // Send a new event with results from network
+                            searchPlacesFromDB(search);
                         } else {
                             // Null result
                             // We may want to display a warning to user (e.g. Toast)
+
+                            Log.e("[PlaceSearcher] [REST]", "Response error : null body");
                         }
                     }
 
@@ -82,10 +110,22 @@ public class PlaceSearchService {
                     public void onFailure(Call<PlaceSearchResult> call, Throwable t) {
                         // Request has failed or is not at expected format
                         // We may want to display a warning to user (e.g. Toast)
+                        Log.e("[PlaceSearcher] [REST]", "Response error : " + t.getMessage());
                     }
                 });
             }
         }, REFRESH_DELAY, TimeUnit.MILLISECONDS);
+    }
+
+    private void searchPlacesFromDB(String search) {
+        // Get places matching the search from DB
+        List<PlaceAddress> matchingPlacesFromDB = new Select().
+                from(PlaceAddress.class)
+                .where("label LIKE '%" + search + "%'")
+                .orderBy("label")
+                .execute();
+        // Post result as an event
+        EventBusManager.BUS.post(new SearchResultEvent(matchingPlacesFromDB));
     }
 
     // Service describing the REST APIs
