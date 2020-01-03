@@ -6,8 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.miage.placesearcher.model.Person;
-import org.miage.placesearcher.ui.PersonAdapter;
+import org.miage.placesearcher.ui.StringAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +26,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Binding ButterKnife annotations now that content view has been set
         ButterKnife.bind(this);
-        
-        // Define list of persons
-        List<Person> listItems = new ArrayList<Person>();
-        for (int i = 0; i < 50; i ++) {
-            listItems.add(new Person("FirstName" + i, "LastName" + i));
+
+        List<String> listItems = new ArrayList<String>();
+        for (int i = 0; i < 50000; i ++) {
+            listItems.add("Item" + (i + 1));
         }
-        // Instanciate a PersonAdapter
-        PersonAdapter adapter = new PersonAdapter(this, listItems);
+        StringAdapter adapter = new StringAdapter(this, listItems);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
