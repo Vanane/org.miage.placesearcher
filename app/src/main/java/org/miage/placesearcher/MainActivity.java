@@ -5,14 +5,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.squareup.otto.Subscribe;
 
 import org.miage.placesearcher.event.EventBusManager;
@@ -74,6 +79,16 @@ public class MainActivity extends AppCompatActivity {
 
                 // Launch a search through the PlaceSearchService
                 PlaceSearchService.INSTANCE.searchPlacesFromAddress(editable.toString());
+            }
+        });
+
+        // Log current token (if any define, otherwise our toekn service will be notified)
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if (task.isComplete()) {
+                    Log.d("[FireBase Token]", "Current token: " + task.getResult());
+                }
             }
         });
     }
