@@ -176,6 +176,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if (associatedPlace != null) {
                     Intent seePlaceDetailIntent = new Intent(MapActivity.this, PlaceDetailActivity.class);
                     seePlaceDetailIntent.putExtra("placeStreet", associatedPlace.getProperties().name);
+                    seePlaceDetailIntent.putExtra("placeLabel", associatedPlace.label);
                     startActivity(seePlaceDetailIntent);
                 }
             }

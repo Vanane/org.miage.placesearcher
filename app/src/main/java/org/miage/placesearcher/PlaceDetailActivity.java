@@ -5,11 +5,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.github.gcacace.signaturepad.views.SignaturePad;
+
+import org.miage.placesearcher.model.Command;
+import org.miage.placesearcher.model.PlaceAddress;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
@@ -30,6 +37,9 @@ public class PlaceDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_detail_place_pic)
     ImageView mPlacePic;
+
+    @BindView(R.id.signature_pad)
+    SignaturePad pad;
 
     private String mPlaceStreetValue;
 
@@ -56,23 +66,51 @@ public class PlaceDetailActivity extends AppCompatActivity {
         startActivity(launchBrowser);
     }
 
-    @OnClick(R.id.activity_detail_button_share)
-    public void clickedOnShare() {
-        // Open share picker using an Intent
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "J'ai découvert " + mPlaceStreetValue + " grâce à Place Searcher !");
-        sendIntent.setType("text/plain");
-        startActivity(sendIntent);
+    @OnClick(R.id.activity_detail_valider)
+    public void onValiderClick()
+    {
+        // Sauvegarder image dans bdd
+        Bitmap signature = pad.getSignatureBitmap();
+        Command c = new Command();
+        c.address = new PlaceAddress();
+        c.address.label = getIntent().getStringExtra("placeLabel");
+        c.signature = bitmapToByteArray(signature);
+        c.save();
+
+        finish();
     }
 
-    @OnClick(R.id.activity_detail_button_galery)
-    public void clickedOnPickFromGalery() {
-        // Open galery picker using an Intent
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, SELECT_PHOTO);
+
+    @OnClick(R.id.activity_detail_effacer)
+    public void onEffacerClick()
+    {
+        pad.clear();
     }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        pad.setOnSignedListener(new SignaturePad.OnSignedListener() {
+
+            @Override
+            public void onStartSigning() {
+                Log.d("aaaaa", "onStartSigning: a");
+                //Event triggered when the pad is touched
+            }
+
+            @Override
+            public void onSigned() {
+                //Event triggered when the pad is signed
+            }
+
+            @Override
+            public void onClear() {
+                //Event triggered when the pad is cleared
+            }
+        });
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -94,8 +132,20 @@ public class PlaceDetailActivity extends AppCompatActivity {
                     } catch (FileNotFoundException e) {
                         // Silent catch : image will not be displayed
                     }
-
                 }
+            break;
         }
+    }
+
+
+    /**
+     * Retourne un tableau d'octets représentant une image Bitmap
+     */
+    private byte[] bitmapToByteArray(Bitmap bmp)
+    {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        return byteArray;
     }
 }
